@@ -1,34 +1,147 @@
 <!DOCTYPE html>
 <html>
 <script src='https://d3js.org/d3.v5.min.js'></script>
-<style> circle {fill: lightblue; stroke: black;} </style>
+
 <body onload='init()'>
-<svg width=300 height=300>
-</svg>
+  <div id="plotWrapper" style="position: relative;">
+    <svg id="plotSVG" width=600 height=600></svg>
+    <select id="select-fuel-type" style="position: absolute; top:0px; left:0px;">
+      <option disabled selected value selected> -- Select a Fuel Type -- </option>
+      <option value="Diesel">Diesel</option>
+      <option value="Gasoline">Gasoline</option>
+      <option value="Electricity">Electricity</option>
+    </select>
+
 <script>
 async function init() {
-const data = await d3.csv("https://flunky.github.io/cars2017.csv",({AverageCityMPG,AverageHighwayMPG, EngineCylinders}) => ({AverageCityMPG: +AverageCityMPG, AverageHighwayMPG: +AverageHighwayMPG, EngineCylinders: +EngineCylinders}));
+const data = await d3.csv("https://flunky.github.io/cars2017.csv",({AverageCityMPG,AverageHighwayMPG, EngineCylinders,Fuel, Make}) => ({AverageCityMPG: +AverageCityMPG, AverageHighwayMPG: +AverageHighwayMPG, EngineCylinders: +EngineCylinders, Fuel, Make}));
 
-var x = d3.scaleLog().domain([10,150]).range([0,200]);
-var y = d3.scaleLog().domain([10,150]).range([200,0]);
+var x = d3.scaleLog().domain([10,150]).range([0,400]);
+var y = d3.scaleLog().domain([10,150]).range([400,0]);
 
-d3.select("svg")
-  .append("g")
-   .attr("transform","translate(50,50)")
-  .selectAll("circle").data(data).enter().append("circle")
-   .attr("cx",function(d,i) {return x(d.AverageCityMPG);})
-   .attr("cy",function(d,i) {return y(d.AverageHighwayMPG);})
-   .attr("r",function(d,i) {return d.EngineCylinders+2;});
+let svg = d3.select("#plotSVG").append("g").attr("transform","translate(100,100)");
 
-d3.select("svg")
-  .append("g")
-   .attr("transform","translate(50,50)")
-   .call(d3.axisLeft(y).tickValues([10,20,50,100]).tickFormat(d3.format("~s")));
+svg.selectAll("circle").data(data).enter().append("circle")
+  .style("fill", function(d,i){
+      if (d.Fuel == "Diesel"){
+        return "red";}
+      if (d.Fuel == "Gasoline"){
+        return "lightblue";}
+      if (d.Fuel == "Electricity"){
+        return "lightgreen";}
+    })
+  .style("stroke", "black")
+  .attr("cx",function(d,i) {return x(d.AverageCityMPG);})
+  .attr("cy",function(d,i) {return y(d.AverageHighwayMPG);})
+  .attr("r",3);
 
-d3.select("svg")
-  .append("g")
-   .attr("transform","translate(50,250)")
-   .call(d3.axisBottom(x).tickValues([10,20,50,100]).tickFormat(d3.format("~s")));
+svg.attr("id","yAxis")
+  .call(d3.axisLeft(y).tickValues([10,15,20,30,50,100,150]).tickFormat(d3.format("~s")));
+  
+svg.append("g")
+  .attr("transform","translate(0,400)")
+  .attr("id","xAxis")
+  .call(d3.axisBottom(x).tickValues([10,15,20,30,50,100,150]).tickFormat(d3.format("~s")));
+
+//add axis label
+svg.append("text")
+  .attr("x", 200 )
+  .attr("y", 450 )
+  .attr("fill", "black")
+  .style("text-anchor", "middle")
+  .text("Average City MPG");
+
+// Y axis label:
+svg.append("text")
+  .attr("transform", "rotate(-90)")
+  .attr("y", -50)
+  .attr("x", -200)
+  .attr("dy", "1em")
+  .attr("fill", "black")
+  .style("text-anchor", "middle")
+  .text("Average Highway MPG");
+
+// add diagonal line
+svg.append("line")
+  .attr("x1", 0)
+  .attr("y1", 400)
+  .attr("x2", 400)
+  .attr("y2", 0)
+  .attr("stroke-width", 2)
+  .attr("stroke", "black")
+  .attr("stroke-dasharray", "5,5");
+
+function update(selectedOption) {
+
+  svg.selectAll("*").remove();
+
+  var dataFilter = data.filter(function(d){return d.Fuel == selectedOption})
+
+  xScale = d3.scaleLog()
+    .domain([d3.min(dataFilter, d => d.AverageCityMPG), d3.max(dataFilter, d => d.AverageCityMPG)])    
+    .range([0, 400]);
+
+  yScale = d3.scaleLog()
+    .domain([d3.min(dataFilter, d => d.AverageHighwayMPG), d3.max(dataFilter, d => d.AverageHighwayMPG)])    
+    .range([400, 0]);
+
+svg.attr("id","yAxis")
+  .call(d3.axisLeft(yScale).tickFormat(d3.format("~s")));
+  
+svg.append("g")
+  .attr("transform","translate(0,400)")
+  .attr("id","xAxis")
+  .call(d3.axisBottom(xScale).tickFormat(d3.format("~s")));
+
+//add axis label
+svg.append("text")
+  .attr("x", 200 )
+  .attr("y", 450 )
+  .attr("fill", "black")
+  .style("text-anchor", "middle")
+  .text("Average City MPG");
+
+// Y axis label:
+svg.append("text")
+  .attr("transform", "rotate(-90)")
+  .attr("y", -50)
+  .attr("x", -200)
+  .attr("dy", "1em")
+  .attr("fill", "black")
+  .style("text-anchor", "middle")
+  .text("Average Highway MPG");
+
+  svg.selectAll("circle").data(dataFilter).enter().append("circle")
+     .style("fill", function(d,i){
+      if (d.Fuel == "Diesel"){
+        return "red";}
+      if (d.Fuel == "Gasoline"){
+        return "lightblue";}
+      if (d.Fuel == "Electricity"){
+        return "lightgreen";}
+    })
+     .style("stroke", "black")
+     .attr("cx",function(d,i) {return xScale(d.AverageCityMPG);})
+     .attr("cy",function(d,i) {return yScale(d.AverageHighwayMPG);})
+     .attr("r",6);
+
+// add diagonal line
+svg.append("line")
+  .attr("x1", 0)
+  .attr("y1", 400)
+  .attr("x2", 400)
+  .attr("y2", 0)
+  .attr("stroke-width", 2)
+  .attr("stroke", "black")
+  .attr("stroke-dasharray", "5,5");
+    
+}
+
+d3.select("#select-fuel-type").on("change", function(d) {
+  var selectedOption = d3.select(this).property("value")
+  update(selectedOption)
+  })
+
 }
 </script>
 </body>
