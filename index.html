@@ -189,14 +189,17 @@ svg.append("g")
      .style("stroke", "black")
      .attr("cx",function(d,i) {return xScale(d.AverageCityMPG);})
      .attr("cy",function(d,i) {return yScale(d.AverageHighwayMPG);})
-     .attr("r",6)
+     .attr("r",3)
      .on("mouseover", function(d) {
      div.style("opacity",1)
            .style("left", (d3.event.pageX) + "px")    
            .style("top", (d3.event.pageY) + "px")
            .html("Avg City MPG: "+d.AverageCityMPG+"<br/>"+"Avg Highway MPG: "+d.AverageHighwayMPG+"<br/>"+"Make: "+d.Make+"<br/>"+"Fuel: "+d.Fuel+"<br/>"+"Engine Cylinders: "+d.EngineCylinders);
-  })
-  .on("mouseout",function() {div.style("opacity",0)});
+      })
+     .on("mouseout",function() {div.style("opacity",0)})
+     .transition()
+     .duration(2000)
+     .attr("r",7);
 
 }
 
