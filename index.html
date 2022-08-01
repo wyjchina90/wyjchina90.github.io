@@ -2,7 +2,7 @@
 <html>
 
 <header>
-  <h1>Automobile Miles Per Gallon Scatter Plot</h1>
+  <h2>Automobile Miles Per Gallon Scatter Plot by Fuel Type</h2>
 </header>
 
 <script src='https://d3js.org/d3.v5.min.js'></script>
@@ -13,9 +13,9 @@
     <svg id="plotSVG" width=600 height=600></svg>
     <select id="select-fuel-type" style="position: absolute; top:0px; left:0px;">
       <option disabled selected value selected> -- Select a Fuel Type -- </option>
-      <option value="Diesel">Diesel</option>
-      <option value="Gasoline">Gasoline</option>
       <option value="Electricity">Electricity</option>
+      <option value="Gasoline">Gasoline</option>
+      <option value="Diesel">Diesel</option>
     </select>
   </div>
   <style> 
@@ -115,6 +115,7 @@ const annotations = [
             align: "left",
             wrap: 190
           },
+          connector: {end: "arrow"} ,
           x: 220,
           y: 280,
           dx: -50,
@@ -126,6 +127,7 @@ const annotations = [
             align: "left",
             wrap: 190
           },
+          connector: {end: "arrow"} ,
           x: 380,
           y: 300,
           dx: 40,
